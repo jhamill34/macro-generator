@@ -4,7 +4,8 @@
 #include <queue> 
 #include <stack>
 #include "tokens.h"
-#include "parse.h"
+#include "composite.h"
+
 
 void parseTokens(queue<Token *> *);
 Composite * parseForLoop(queue<Token *> *);

@@ -13,7 +13,7 @@ int
 main(int argc, char * argv[])
 {
   queue<Token *> * token_queue = scanner(argv[1]);
-  parseTokens(token_queue);
+  //parseTokens(token_queue);
 
 
   Token * _t1 = new Token;

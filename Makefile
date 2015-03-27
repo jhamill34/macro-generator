@@ -1,7 +1,7 @@
 all: macro
 
-macro: main.o parse.o tokens.o
-	g++ -Wall -g -o macro main.o parse.o tokens.o
+macro: main.o parse.o tokens.o composite.o
+	g++ -Wall -g -o macro main.o parse.o tokens.o composite.o
 
 main.o: main.cpp composite.h 
 	g++ -Wall -g -c main.cpp
@@ -11,6 +11,9 @@ parse.o: parse.cpp parse.h
 
 tokens.o: tokens.cpp tokens.h
 	g++ -Wall -g -c tokens.cpp	
+
+composite.o: composite.cpp composite.h
+	g++ -Wall -g -c composite.cpp
 
 clean: 
 	rm -rf *.o macro
