@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "list.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "file.h"
 
 
