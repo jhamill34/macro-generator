@@ -5,3 +5,11 @@
 
 some other stuff
 
+//MACRO: if(a = b){
+	if stuff....
+//MACRO: }else if(a = c){
+	else if stuff...
+//MACRO: }else{
+	else stuff .. 	
+//MACRO: }
+

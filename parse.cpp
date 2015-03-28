@@ -57,8 +57,9 @@ AbstractComposite * Parse::parseStatement(){
       token_queue->pop();
       _statement = parseLoopBlock((Composite *)_statement);
 
-    }else if(next->type == IF_CONDITION || next->type == ELSE_CONDITION){
+    }else if(next->type == IF_CONDITION){
       _statement = new Composite(next);
+      token_queue->pop();
       _statement = parseConditionalBlock((Composite *)_statement);
 
     }else if(next->type == IDENTIFIER){
@@ -249,6 +250,46 @@ Composite * Parse::parseLoopBlock(Composite * _loopblock){
  *                    | else { BLOCK }
  * @return [description]
  */
-Composite * Parse::parseConditionalBlock(Composite *){
-  return NULL;
+Composite * Parse::parseConditionalBlock(Composite * _conditionblock){
+  Token * next = token_queue->front();
+  if(next->type == OPEN_PAREN){
+    nesting_stack.push(next->type);
+    token_queue->pop();
+  }else{
+    cout << "Syntax Error: Missing Parenthesis" << endl;
+    cout << next->value << endl;
+    exit(1);
+  }
+
+  _conditionblock->addChild(parseExpression());
+
+  // Ensure proper nesting with closing paren
+  next = token_queue->front();
+  if(next->type == CLOSE_PAREN && nesting_stack.top() == OPEN_PAREN){
+    nesting_stack.pop();
+    token_queue->pop();
+  }else{
+    cout << "Syntax Error: Missing closing Parenthesis" << endl;
+    cout << next->value << endl;
+    cout << token_queue->front()->value << endl;
+    exit(1);
+  }
+
+  _conditionblock->addChild(parseBlock());
+
+  next = token_queue->front();
+  if(next->type == ELSE_CONDITION){
+    token_queue->pop();
+    next = token_queue->front();
+    if(next->type == IF_CONDITION){
+      Composite * _nestedIf = new Composite(next);
+      token_queue->pop();
+      _nestedIf = parseConditionalBlock(_nestedIf);
+      _conditionblock->addChild(_nestedIf);
+    }else{
+      _conditionblock->addChild(parseBlock());
+    }
+  }
+
+  return _conditionblock;
 }
