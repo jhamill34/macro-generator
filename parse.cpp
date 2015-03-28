@@ -3,132 +3,112 @@
 #include <queue>
 #include "tokens.h"
 #include "composite.h"
+#include "parse.h"
 
 using namespace std;
 
-//
-//  IDENTIFIER ASIGNMENT_OP EXPRESSION | CONDITIONAL_EXP END_STATEMENT 
-//
 
-//
-//  CONDITIONAL_BLOCK | LOOP_BLOCK | ASSIGNMENT  
-//
+//======== PUBLIC METHODS ============
 
-//
-//  <IDENTIFIER|NUMBER|STRING> OPERATOR <IDENTIFIER|NUMBER|STRING>
-//
-
-
-// 
-//  for ( EXPRESSION; CONDITIONAL_EXP; EXPRESSION ) { BLOCK }
-//
-
-//
-// if ( CONDITIONAL_EXP ) { BLOCK } else? { BLOCK }
-//
-
-
-//
-//  <IDENTIFIER | NUMBER | STRING> CONDITIONAL_SYMBOL <IDENTIFIER | NUMBER | STRING>
-//
-
-
-//
-//  { STATEMENT_LIST } -> { STATEMENT  STATEMENT  ... STATEMENT  }
-//
-
-Composite * 
-parseForLoop(queue<Token *> *token_queue){
-  stack<TokenType> closure_stack;
-  Composite * parent = new Composite(token_queue->front());
-  token_queue->pop();
-  
-  if(token_queue->front()->type == OPEN_PAREN){
-    closure_stack.push(token_queue->front()->type);
-    token_queue->pop();
-  }else{
-    // TODO: keep track of the location so we can point to 
-    // where the syntax error occured
-    cout << "Syntax Error: mising parenthesis --> for (" << endl;
-    exit(1);
-  }
-  
-  // parse for loop
-  // parent->addChild(parseStatement(token_queue));
-
-  if(token_queue->front()->type != END_STATEMENT){
-    cout << "Syntax Error: missing semi-colon after expression" << endl;
-    exit(1);
-  }else{
-    token_queue->pop();
-  }
-
-  // parent->addChild(parseConditional(token_queue));
-
-  if(token_queue->front()->type != END_STATEMENT){
-    cout << "Syntax Error: missing semi-colon after expression" << endl;
-    exit(1);
-  }else{
-    token_queue->pop();
-  }
-
-  // parent->addChild(parseStatement(token_queue));
-
-  if(token_queue->front()->type == CLOSE_PAREN && closure_stack.top() == OPEN_PAREN){
-    closure_stack.pop();
-  }else{
-    cout << "Syntax Error: missing parenthesis --> for ( ... )" << endl;
-    exit(1);
-  }
-
-  if(token_queue->front()->type == OPEN_BLOCK){
-    closure_stack.push(token_queue->front()->type);
-    token_queue->pop();
-  }else{
-    // TODO: keep track of the location so we can point to 
-    // where the syntax error occured
-    cout << "Syntax Error: mising block start --> for ( ... ) {" << endl;
-    exit(1);
-  }
-
-  // parent->addChild(parseBlock(token_queue));
-
-  return parent;
-  
+/**
+ * Constructor 
+ * @param queue<Token *> * _token_queue 
+ */
+Parse::Parse(queue<Token *> * _token_queue){
+  token_queue = _token_queue;
 }
 
-Composite *
-parseBlock(queue<Token *> *token_queue, Composite * parent){
-  stack<TokenType> closure_stack;
-  
-  if(token_queue->front()->type == CLOSE_BLOCK && closure_stack.top() == OPEN_BLOCK){
-    closure_stack.pop();
-  }else{
-    cout << "Syntax Error: missing block end --> for ( ... ) { stuff }" << endl;
-    exit(1);
+/**
+ * Initial call that returns a composite object
+ * PROGRAM := STATEMENT_LIST
+ * @return Composite * _root
+ */
+Composite * Parse::parseProgram(){
+  // Create a root node
+  Token * program = new Token();
+  program->value = "Program Start";
+  program->type = PROGRAM;
+  Composite * _root = new Composite(program);
+
+  // Start pulling out tokens
+  while(!token_queue->empty()){
+    // We expect statements so we call the private method
+    parseStatement();
   }
+
+  return _root;
+}
+
+
+//======== PRIVTATE METHODS ==========
+
+/**
+ * From the current state of the queue looks for 
+ * tokens pertaining to a "statement"
+ * STATEMENT := ASSIGNMENT ; | LOOP_BLOCK | CONDITIONAL_BLOCK 
+ * @return Composite * _statement
+ */
+Composite * Parse::parseStatement(){
+    Token * next = token_queue->front();
+
+    cout << next->value << endl;
+
+    // remove the next token
+    token_queue->pop();
+    return NULL;
+}
+
+/**
+ * Looks for tokens pertaining to an "assignment"
+ * ASSIGNMENT := INDENTIFIER SYMBOL EXPRESSION
+ * @return Composite * _assignment
+ */
+Composite * Parse::parseAssignment(){
   return NULL;
 }
 
+/**
+ * Looks for tokens pertaining to an "expression"
+ * EXPRESSION := [IDENTIFIER|CONSTANT] SYMBOL [IDENTIFIER|CONSTANT]
+ * @return Composite * _expression
+ */
+Composite * Parse::parseExpression(){
+  return NULL;
+}
 
-void 
-parseTokens(queue<Token *>* token_queue){
-  Token * tmp;
-  
-  Token * prog = new Token;
-  prog->value = "root";
-  prog->type = PROGRAM;
+/**
+ * Looks for a token that is a "constant"
+ * CONSTANT := NUMBER | STRING
+ * @return Leaf * _constant
+ */
+Leaf * Parse::parseConstant(){
+  return NULL;
+}
 
-  Composite * root = new Composite(prog);
+/**
+ * Looks or tokens that look like blocks
+ * BLOCK := STATEMENT_LIST
+ * @return Composite * _block
+ */
+Composite * Parse::parseBlock(){
+  return NULL;
+}
 
-  while(!token_queue->empty()){
-    tmp = token_queue->front();
-    if(tmp->type == FOR_LOOP_STATEMENT){
-      // root->addChild(parseForLoop(token_queue));
-    }else if(tmp->type == IF_CONDITION){
-      //look for condition and block 
-    }else if(tmp->type == ELSE_CONDITION){
-      // look for block
-    }
-  }
+/**
+ * Looks for tokens that look like a loop block
+ * LOOP_BLOCK := for ( EXPRESSION ; EXPRESSION ; EXPRESSION ) { BLOCK }
+ * @return [description]
+ */
+Composite * Parse::parseLoopBlock(){
+  return NULL;
+}
+
+/**
+ * Looks for tokens that look like a conditional 
+ * CONDITIONAL_BLOCK := if ( EXPRESSION ) { BLOCK }
+ *                    | else { BLOCK }
+ * @return [description]
+ */
+Composite * Parse::parseConditionalBlock(){
+  return NULL;
 }

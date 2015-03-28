@@ -7,8 +7,11 @@
 
 using namespace std;
 
+// Forward declaration of CompositeIterator class
 class CompositeIterator;
 
+// Class to extend so we can create a composite design pattern
+// TODO: make the composite pattern generic with templates
 class AbstractComposite{
 protected:
   Token * data;
@@ -24,7 +27,9 @@ public:
 
 };
 
-
+// Iterator class that we use to go through the tokens
+// placed in the composite pattern so we can iterate through
+// them in the correct order
 class CompositeIterator{
   // Has-an abstract composite object to iterate
   AbstractComposite * root;
@@ -41,6 +46,7 @@ public:
   AbstractComposite * next();
 };
 
+// Has many AbstractComposite objects
 class Composite : public AbstractComposite{
   // has many abstract composite objects
   vector<AbstractComposite *> children; // empty vector
@@ -53,6 +59,7 @@ public:
   int size();
 };
 
+// An end point to the composite pattern, holds primitive types (ie Number or String)
 class Leaf : public AbstractComposite{
 
 public:

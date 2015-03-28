@@ -6,12 +6,22 @@
 #include "tokens.h"
 #include "composite.h"
 
+class Parse{
+  stack<TokenType> nesting_stack;
+  queue<Token *> * token_queue;
 
-void parseTokens(queue<Token *> *);
-Composite * parseForLoop(queue<Token *> *);
-Composite * parseConditional(queue<Token *> *);
-Composite * parseBlock(queue<Token *> *);
-Composite * parseStatement(queue<Token *> *);
+public:  
+  Parse(queue<Token *> *);
+  Composite * parseProgram();
 
+private:
+  Composite * parseStatement();
+  Composite * parseAssignment();
+  Composite * parseExpression();
+  Leaf      * parseConstant();
+  Composite * parseBlock();
+  Composite * parseLoopBlock();
+  Composite * parseConditionalBlock();
+};
 
 #endif

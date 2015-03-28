@@ -7,6 +7,12 @@
 
 using namespace std;
 
+/** Function to add a new token to the queue based off a value and type
+  * @param string value 
+  * @param queue<Token *> * pointer to a queue that holds tokens
+  * @param enum TokenType type
+  * @return void
+  */
 void add_token(queue<Token *> * token_queue, string value, TokenType type)
 {
   Token * tmp = new Token;
@@ -15,6 +21,12 @@ void add_token(queue<Token *> * token_queue, string value, TokenType type)
   token_queue->push(tmp);
 }
 
+/**
+* Function to parse through each character in a file and analyze if the 
+* characters and following characters form a particular token
+* @param char * filename (ie char array)
+* @param queue<Token *> * queue of all the tokens found FIFO
+*/
 queue<Token *> * 
 scanner(char * filename){
   string line;
@@ -141,7 +153,7 @@ scanner(char * filename){
     }
     lineNum++;
   }
-
+  add_token(token_queue, "Program End", EOP);
   return token_queue;
 }
 

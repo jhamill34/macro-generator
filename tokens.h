@@ -84,7 +84,8 @@ typedef enum {
   MACRO_END,
   INLINE_START,
   INLINE_END,
-  END_STATEMENT
+  END_STATEMENT,
+  EOP
 } TokenType;
 
 typedef struct Token{
