@@ -38,6 +38,7 @@
                     || x == PIPE || x == ASTERISK || x == PLUS  \
                     || x == MINUS || x == FSLASH || x == BSLASH || x == BANG
 
+// TODO: replace line[i] with x... we lucked out on this bug
 #define IS_VALID_IDENTIFIER(x) (line[i] <= NUMBER_NINE && line[i] >= NUMBER_ZERO) \
                             || (line[i] >= A_LOWER && line[i] <= Z_LOWER) \
                             || (line[i] >= A_UPPER && line[i] <= Z_UPPER) \
@@ -88,9 +89,13 @@ typedef enum {
   EOP
 } TokenType;
 
+#define IS_CONSTANT(x) x == STRING || x == NUMBER
+
 typedef struct Token{
   std::string value;
   TokenType type;
+  int col_num; // not yet
+  int row_num;
 } Token;
 
 void add_token(std::queue<Token *> *, std::string, TokenType);

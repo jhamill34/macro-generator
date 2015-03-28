@@ -62,6 +62,15 @@ AbstractComposite * CompositeIterator::next(){
 	return child;
 }
 
+/**
+ * Returns how many levels deep into the tree type structure 
+ * you are ... used for printing indents
+ * @return integer 
+ */
+int CompositeIterator::getDepth(){
+	return child_stack->size();
+}
+
 /** Function to return an iterator object based off of the current instance
 * @returns CompositeIterator * 
 */

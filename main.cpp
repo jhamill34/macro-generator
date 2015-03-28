@@ -23,6 +23,10 @@ main(int argc, char * argv[])
   CompositeIterator * program_iterator = root->iterator();
   AbstractComposite * val = program_iterator->next(); 
   while(val != NULL){
+    int i;
+    for(i = 0; i < program_iterator->getDepth(); i++){
+      cout << "*";
+    }
     cout << val->getData()->value << endl;
     val = program_iterator->next();
   }

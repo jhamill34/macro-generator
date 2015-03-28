@@ -44,6 +44,8 @@ public:
   AbstractComposite * first();
 
   AbstractComposite * next();
+
+  int getDepth();
 };
 
 // Has many AbstractComposite objects

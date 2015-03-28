@@ -15,13 +15,12 @@ public:
   Composite * parseProgram();
 
 private:
-  Composite * parseStatement();
+  AbstractComposite * parseStatement();
   Composite * parseAssignment();
-  Composite * parseExpression();
-  Leaf      * parseConstant();
+  AbstractComposite * parseExpression();
   Composite * parseBlock();
-  Composite * parseLoopBlock();
-  Composite * parseConditionalBlock();
+  Composite * parseLoopBlock(Composite *);
+  Composite * parseConditionalBlock(Composite * );
 };
 
 #endif

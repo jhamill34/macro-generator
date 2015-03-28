@@ -13,11 +13,13 @@ using namespace std;
   * @param enum TokenType type
   * @return void
   */
-void add_token(queue<Token *> * token_queue, string value, TokenType type)
+void add_token(queue<Token *> * token_queue, string value, TokenType type, int col, int row)
 {
   Token * tmp = new Token;
   tmp->value = value;
   tmp->type = type;
+  tmp->col_num = col;
+  tmp->row_num = row;
   token_queue->push(tmp);
 }
 
@@ -45,29 +47,29 @@ scanner(char * filename){
         if(i == line.size()){ 
           inMacro = false;
         }else if(line.compare(i, strlen(FOR_LOOP), FOR_LOOP) == 0){
-          add_token(token_queue, "FOR", FOR_LOOP_STATEMENT);
+          add_token(token_queue, "FOR", FOR_LOOP_STATEMENT, i, lineNum);
           i += (strlen(FOR_LOOP) - 1);
         }else if(line.compare(i, strlen(IF), IF) == 0){
-          add_token(token_queue, "IF", IF_CONDITION);
+          add_token(token_queue, "IF", IF_CONDITION, i, lineNum);
           i += (strlen(IF) -1);
         }else if(line.compare(i, strlen(ELSE), ELSE) == 0){
-          add_token(token_queue, "ELSE", ELSE_CONDITION);
+          add_token(token_queue, "ELSE", ELSE_CONDITION, i, lineNum);
           i += (strlen(ELSE) - 1);
         }else if(line[i] == LP){
           char ch[2] = {line[i], '\0'};
-          add_token(token_queue, ch, OPEN_PAREN);
+          add_token(token_queue, ch, OPEN_PAREN, i, lineNum);
         }else if(line[i] == RP){
           char ch[2] = {line[i], '\0'};
-          add_token(token_queue, ch, CLOSE_PAREN);
+          add_token(token_queue, ch, CLOSE_PAREN, i, lineNum);
         }else if(line[i] == LB){
           char ch[2] = {line[i], '\0'};
-          add_token(token_queue, ch, OPEN_BLOCK);
+          add_token(token_queue, ch, OPEN_BLOCK, i, lineNum);
         }else if(line[i] == RB){
           char ch[2] = {line[i], '\0'};
-          add_token(token_queue, ch, CLOSE_BLOCK);
+          add_token(token_queue, ch, CLOSE_BLOCK, i, lineNum);
         }else if(line[i] == SEMICOLON){
           char ch[2] = {line[i], '\0'};
-          add_token(token_queue, ch, END_STATEMENT);
+          add_token(token_queue, ch, END_STATEMENT, i, lineNum);
         }else if(line[i] == STRING_QUOTE_DOUBLE){
           int start, end;
           i++;
@@ -76,7 +78,7 @@ scanner(char * filename){
              i++;
           }
           end = i;
-          add_token(token_queue, line.substr(start, end - start), STRING);
+          add_token(token_queue, line.substr(start, end - start), STRING, i, lineNum);
         }else if(line[i] <= NUMBER_NINE && line[i] >= NUMBER_ZERO){
           // Assumes numbers are not concatenated with letters or anything
           int start, end;
@@ -86,7 +88,7 @@ scanner(char * filename){
           }
           end = i;
           i--;
-          add_token(token_queue, line.substr(start, end - start), NUMBER);
+          add_token(token_queue, line.substr(start, end - start), NUMBER, i, lineNum);
         }else if(IS_SYMBOL(line[i])){
           int start, end;
           start = i;
@@ -95,7 +97,7 @@ scanner(char * filename){
           }
           end = i + 1;
          
-          add_token(token_queue, line.substr(start, end - start), SYMBOL); 
+          add_token(token_queue, line.substr(start, end - start), SYMBOL, i, lineNum); 
         }else if(line[i] != WS && line[i] != TAB){
           int start, end;
           start = i; 
@@ -104,7 +106,7 @@ scanner(char * filename){
           }
           end = i;
           i--;
-          add_token(token_queue, line.substr(start, end - start), IDENTIFIER);
+          add_token(token_queue, line.substr(start, end - start), IDENTIFIER, i, lineNum);
         }
       }else{
         if(line.compare(i, strlen(OPEN_MACRO), OPEN_MACRO) == 0){
@@ -117,10 +119,10 @@ scanner(char * filename){
             if(i <= (line.size() - strlen(INLINE_OPEN)) && line.compare(i, strlen(INLINE_OPEN), INLINE_OPEN) == 0){
               end = i;
               if(end != start){  
-                add_token(token_queue, line.substr(start, end - start), PRINT);
+                add_token(token_queue, line.substr(start, end - start), PRINT, i, lineNum);
               }
             
-              add_token(token_queue, line.substr(i, strlen(INLINE_OPEN)), INLINE_START);
+              add_token(token_queue, line.substr(i, strlen(INLINE_OPEN)), INLINE_START, i, lineNum);
               i += (strlen(INLINE_OPEN));
 
               while(line.compare(i, strlen(INLINE_CLOSE), INLINE_CLOSE)){
@@ -131,12 +133,12 @@ scanner(char * filename){
                     i++;
                   }
                   end = i;
-                  add_token(token_queue, line.substr(start, end - start), IDENTIFIER);
+                  add_token(token_queue, line.substr(start, end - start), IDENTIFIER, i, lineNum);
                 }
                 i++;
               }
 
-              add_token(token_queue, line.substr(i, strlen(INLINE_CLOSE)), INLINE_END);
+              add_token(token_queue, line.substr(i, strlen(INLINE_CLOSE)), INLINE_END, i, lineNum);
               i += (strlen(INLINE_CLOSE)-1);
               start = i + 1;
             }
@@ -144,16 +146,16 @@ scanner(char * filename){
           }
           end = i;
           if(end != start){  
-            add_token(token_queue, line.substr(start, end - start), PRINT);
+            add_token(token_queue, line.substr(start, end - start), PRINT, i, lineNum);
           }
         }else{
-          add_token(token_queue, "\n", PRINT);
+          add_token(token_queue, "\n", PRINT, i, lineNum);
         }
       }
     }
     lineNum++;
   }
-  add_token(token_queue, "Program End", EOP);
+  add_token(token_queue, "Program End", EOP, -1, -1);
   return token_queue;
 }
 

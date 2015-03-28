@@ -1,13 +1,7 @@
-//MACRO: for(i = "0"; i < 10; i++){ 
-  some text here ... {{ i }}
+//MACRO: j = 10;
+//MACRO: for(i = "0"; i < 10; i = i + 1 ){ 
+  some text here ... 
 //MACRO: } 
 
 some other stuff
 
-
-//MACRO: if(1 == 2){ 
-  if a is 2
-//MACRO: }else{
-//MACRO: aB_c = "str";
-  reall a is not 2 though
-//MACRO: } 
