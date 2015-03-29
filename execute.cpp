@@ -87,11 +87,11 @@ int Execute::doMath(Token * t){
 }
 
 void Execute::execForLoop(){
-	cout << "EXECUTE FOR LOOP" << endl;
+	//cout << "EXECUTE FOR LOOP" << endl;
 }
 
 void Execute::execIfCondition(){
-	cout << "EXECT IF CONDITION" << endl;
+	//cout << "EXECT IF CONDITION" << endl;
 }
 
 void Execute::execElseCondition(){	
