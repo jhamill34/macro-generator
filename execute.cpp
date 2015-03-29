@@ -98,16 +98,9 @@ void Execute::execElseCondition(){
 	cout << "EXECUTE ELSE" << endl;
 }
 
-void Execute::execAssignment(){
-	cout << "ASSIGNING VARIABLE" << endl;
-}
 
 void Execute::execBlock(){
 	cout << "EXECUTING BLOCK CLODE" << endl;
-}
-
-void Execute::execExpression(){
-	cout << "EXECUTE EXPRESSION" << endl;
 }
 
 void Execute::execPrint(Token * current){

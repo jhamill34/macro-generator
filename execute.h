@@ -21,9 +21,7 @@ private:
 	void execForLoop();
 	void execIfCondition();
 	void execElseCondition();
-	void execAssignment();
 	void execBlock();
-	void execExpression();
 	void execPrint(Token * current);
 	int toInteger(string value);
 	int doMath(Token * t);
