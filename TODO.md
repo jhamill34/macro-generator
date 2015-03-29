@@ -34,3 +34,4 @@ String Literals "" ''
 What we don't need:
 built in data structures such as arrays or dictionarys (posibly rev 2)
 
+Variable scopes?? right now its only global

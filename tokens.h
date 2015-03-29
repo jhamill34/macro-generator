@@ -25,6 +25,7 @@
 #define AND '&'
 #define PIPE '|'
 #define ASTERISK '*'
+#define CARET '^'
 #define PLUS '+'
 #define MINUS '-'
 #define FSLASH '/'
@@ -34,15 +35,16 @@
 #define STRING_QUOTE_SINLE '\''
 #define STRING_QUOTE_DOUBLE '\"'
 
+
 #define IS_SYMBOL(x) x == EQ || x == GT || x == LT || x == COLON || x == COMMA || x == AND \
                     || x == PIPE || x == ASTERISK || x == PLUS  \
-                    || x == MINUS || x == FSLASH || x == BSLASH || x == BANG
+                    || x == MINUS || x == FSLASH || x == BSLASH || x == BANG || x == CARET
 
 // TODO: replace line[i] with x... we lucked out on this bug
-#define IS_VALID_IDENTIFIER(x) (line[i] <= NUMBER_NINE && line[i] >= NUMBER_ZERO) \
-                            || (line[i] >= A_LOWER && line[i] <= Z_LOWER) \
-                            || (line[i] >= A_UPPER && line[i] <= Z_UPPER) \
-                            || line[i] == UNDERSCORE
+#define IS_VALID_IDENTIFIER(x) (x <= NUMBER_NINE && x >= NUMBER_ZERO) \
+                            || (x >= A_LOWER && x <= Z_LOWER) \
+                            || (x >= A_UPPER && x <= Z_UPPER) \
+                            || x == UNDERSCORE
 
 // Use a range to determine 
 // val >= NUMBER_ONE || val <= NUMBER_NINE
@@ -91,11 +93,21 @@ typedef enum {
 
 #define IS_CONSTANT(x) x == STRING || x == NUMBER
 
+
+// DEFINED Priorities to used to order
+// Expressions in the correcto way PEMDAS
+#define DEFAULT_PRIORTY -1 // Note this is unsigned
+#define ADD_SUB 1
+#define MULT_DIV 2
+#define EXP 3
+#define PAREN_DELTA 3
+
 typedef struct Token{
   std::string value;
   TokenType type;
   int col_num; // not yet
   int row_num;
+  unsigned int priority;
 } Token;
 
 void add_token(std::queue<Token *> *, std::string, TokenType);

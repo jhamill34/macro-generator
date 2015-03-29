@@ -58,6 +58,8 @@ public:
 
   AbstractComposite * getChild(unsigned int index);
   void addChild(AbstractComposite * child);
+  void removeLastChild();
+  void setChild(AbstractComposite *, unsigned int);
   int size();
 };
 

@@ -18,9 +18,20 @@ private:
   AbstractComposite * parseStatement();
   Composite * parseAssignment();
   AbstractComposite * parseExpression();
+  AbstractComposite * parseExpressionHelp(unsigned int);
   Composite * parseBlock();
   Composite * parseLoopBlock(Composite *);
   Composite * parseConditionalBlock(Composite * );
+  Composite * parseInline();
+  Composite * rotateLeft(Composite * tmp_head){
+    AbstractComposite * tmp = tmp_head->getChild(1);
+    tmp_head->removeLastChild();
+    tmp_head->addChild(tmp->getChild(0));
+    ((Composite *)tmp)->setChild(tmp_head, 0);
+    tmp_head = (Composite *)tmp;
+  
+    return tmp_head;
+  }
 };
 
 #endif

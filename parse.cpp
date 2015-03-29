@@ -62,12 +62,16 @@ AbstractComposite * Parse::parseStatement(){
       token_queue->pop();
       _statement = parseConditionalBlock((Composite *)_statement);
 
-    }else if(next->type == IDENTIFIER){
+    }else if(next->type == IDENTIFIER 
+          || (next->type == SYMBOL && next->value.size() == 2 && ((next->value[0] == MINUS && next->value[1] == MINUS) 
+                                     || (next->value[0] == PLUS && next->value[1] == PLUS)))){
       _statement = parseAssignment();
       if(token_queue->front()->type != END_STATEMENT){
-        cout << "Syntax Error: mising semi-colon";
+        cout << "Syntax Error: mising semi-colon" << endl;
         exit(1);
       }
+    }else if(next->type == INLINE_START){
+      _statement = parseInline();
     }else if(next->type == PRINT){
       _statement = new Leaf(next);
     }else{
@@ -78,6 +82,39 @@ AbstractComposite * Parse::parseStatement(){
     // remove the next token
     token_queue->pop();
     return _statement;
+}
+
+/**
+ * Looks for tokens or Identifiers to insert using 
+ * the inline tags
+ * INLINE := INLINE_OPEN IDENTIFIER INLINE_CLOSE
+ * @return [description]
+ */
+Composite * Parse::parseInline(){
+  Token * next = token_queue->front();
+  Composite * _inline = new Composite(next);
+  token_queue->pop();
+
+  next = token_queue->front();
+  while(next->type != INLINE_END && next->type != EOP){
+    Leaf * _sub = new Leaf(next);
+    if(next->type == IDENTIFIER){
+      _inline->addChild(_sub);  
+    }else{
+      cout << "Syntax Error: expected variable inside inline tokens" << endl;
+      cout << next->value << endl;
+      exit(1);
+    }
+    token_queue->pop();
+    next = token_queue->front();
+  }
+
+  if(next->type == EOP){
+    cout << "Syntax Error: Reached end of file before finding Closing Inline" << endl;
+    exit(1);
+  }
+
+  return _inline;
 }
 
 /**
@@ -95,19 +132,58 @@ Composite * Parse::parseAssignment(){
   // Pop and look to see if we have an '='
   token_queue->pop(); 
   Token * sym = token_queue->front();
-  if(sym->type == SYMBOL && sym->value[0] == EQ){
+  if(sym->type == SYMBOL && sym->value.size() == 1 && sym->value[0] == EQ){
     _statement = new Composite(sym);
     token_queue->pop();
 
     // Add children
     _statement->addChild(_identifier);
     _statement->addChild(parseExpression());
+  }else if(_identifier->getData()->type == IDENTIFIER 
+          && sym->value.size() == 2 && sym->value[1] == EQ 
+          && (sym->value[0] != LT || sym->value[0] != GT || sym->value[0] != EQ || sym->value[0] != BANG)){
+    // Break the current symbol into two
+    Token * assign = new Token();
+    assign->type = SYMBOL;
+    assign->value = EQ;
+
+    Token * op = new Token();
+    op->type = SYMBOL;
+    op->value = sym->value[0];
+    if(op->value[0] == PLUS || op->value[0] == MINUS){
+      op->priority = ADD_SUB;
+    }else if(op->value[0] == ASTERISK || op->value[0] == FSLASH){
+      op->priority = MULT_DIV;
+    }else if(op->value[0] == CARET){
+      op->priority = EXP;
+    }else{
+      op->priority = DEFAULT_PRIORTY;
+    }
+    // Create a copy of the identifier token
+    Token * identifier_copy = new Token();
+    identifier_copy->type = IDENTIFIER;
+    identifier_copy->value = _identifier->getData()->value;
+
+    Leaf * left = new Leaf(identifier_copy);
+    Composite * op_new = new Composite(op);
+    op_new->addChild(left);
+    token_queue->pop();
+    op_new->addChild(parseExpression());
+
+    _statement = new Composite(assign);
+    _statement->addChild(_identifier);
+    _statement->addChild(op_new);
   }else{
     cout << "Syntax Error: expected assignment operator" << endl;
+    cout << sym->value << endl;
     exit(1);
   }
 
   return _statement;
+}
+
+AbstractComposite * Parse::parseExpression(){
+  return parseExpressionHelp(0);
 }
 
 /**
@@ -116,18 +192,89 @@ Composite * Parse::parseAssignment(){
  * EXPRESSION := [IDENTIFIER|CONSTANT] SYMBOL [IDENTIFIER|CONSTANT]
  * @return Composite * _expression
  */
-AbstractComposite * Parse::parseExpression(){
+AbstractComposite * Parse::parseExpressionHelp(unsigned int paren_depth){
   Token * next = token_queue->front();
   Composite * _expression;
+
+
+  // If we see an open parenthesis then increment the counter
+  while(next->type == OPEN_PAREN){
+    // Push onto the stack to ensure the correct nesting
+    nesting_stack.push(next->type); 
+    paren_depth += PAREN_DELTA;
+    token_queue->pop();
+    next = token_queue->front();
+  }
+
   if(next->type == IDENTIFIER || IS_CONSTANT(next->type)){
     Leaf * left_side = new Leaf(next);
     token_queue->pop();
     next = token_queue->front();
-    if(next->type == SYMBOL){
-      _expression = new Composite(next);
-      _expression->addChild(left_side);
+
+    while(next->type == CLOSE_PAREN && nesting_stack.top() == OPEN_PAREN){
+      nesting_stack.pop();
+      paren_depth -= PAREN_DELTA;
       token_queue->pop();
-      _expression->addChild(parseExpression()); // Recursive call
+      next = token_queue->front();
+    }
+
+    if(next->type == SYMBOL){
+      if(left_side->getData()->type == IDENTIFIER 
+          && next->value.size() == 2 && next->value[1] == EQ 
+          && (next->value[0] != LT && next->value[0] != GT && next->value[0] != EQ && next->value[0] != BANG)){
+        // Break the current symbol into two
+        Token * assign = new Token();
+        assign->type = SYMBOL;
+        assign->value = EQ;
+
+        Token * op = new Token();
+        op->type = SYMBOL;
+        op->value = next->value[0];
+        if(op->value[0] == PLUS || op->value[0] == MINUS){
+          op->priority = ADD_SUB;
+        }else if(op->value[0] == ASTERISK || op->value[0] == FSLASH){
+          op->priority = MULT_DIV;
+        }else if(op->value[0] == CARET){
+          op->priority = EXP;
+        }else{
+          op->priority = DEFAULT_PRIORTY;
+        }
+        op->priority += paren_depth;
+
+        // Create a copy of the identifier token
+        Token * identifier_copy = new Token();
+        identifier_copy->type = IDENTIFIER;
+        identifier_copy->value = left_side->getData()->value;
+
+        Leaf * left = new Leaf(identifier_copy);
+        Composite * op_new = new Composite(op);
+        op_new->addChild(left);
+        token_queue->pop();
+        op_new->addChild(parseExpressionHelp(paren_depth));
+        
+        _expression = new Composite(assign);
+        _expression->addChild(left_side);
+        _expression->addChild(op_new);      
+      }else{
+        next->priority += paren_depth;
+        _expression = new Composite(next);
+        _expression->addChild(left_side);
+        token_queue->pop();
+        _expression->addChild(parseExpressionHelp(paren_depth)); // Recursive call
+
+        // Condition to rotate
+        if(_expression->getData()->priority > _expression->getChild(1)->getData()->priority){
+          // Temporary pointer so we can keep track of the child
+          // First Rotation
+          _expression = rotateLeft(_expression);
+          AbstractComposite * tmp_left = _expression->getChild(0);
+          if(tmp_left->getData()->priority > tmp_left->getChild(1)->getData()->priority){
+            tmp_left = rotateLeft((Composite *)tmp_left);
+            _expression->setChild(tmp_left, 0);
+          }
+        }
+
+      }
     }else{
       return left_side;
     }
@@ -221,19 +368,6 @@ Composite * Parse::parseLoopBlock(Composite * _loopblock){
 
   _loopblock->addChild(parseExpression());
 
-  // Ensure proper nesting with closing paren
-  next = token_queue->front();
-  if(next->type == CLOSE_PAREN && nesting_stack.top() == OPEN_PAREN){
-    nesting_stack.pop();
-    token_queue->pop();
-  }else{
-    cout << "Syntax Error: Missing closing Parenthesis" << endl;
-    cout << next->value << endl;
-    token_queue->pop();
-    cout << token_queue->front()->value << endl;
-    exit(1);
-  }
-
 
   // parseBlock looks for the closing bracket
   _loopblock->addChild(parseBlock());
@@ -263,17 +397,6 @@ Composite * Parse::parseConditionalBlock(Composite * _conditionblock){
 
   _conditionblock->addChild(parseExpression());
 
-  // Ensure proper nesting with closing paren
-  next = token_queue->front();
-  if(next->type == CLOSE_PAREN && nesting_stack.top() == OPEN_PAREN){
-    nesting_stack.pop();
-    token_queue->pop();
-  }else{
-    cout << "Syntax Error: Missing closing Parenthesis" << endl;
-    cout << next->value << endl;
-    cout << token_queue->front()->value << endl;
-    exit(1);
-  }
 
   _conditionblock->addChild(parseBlock());
 

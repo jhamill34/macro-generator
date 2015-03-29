@@ -99,6 +99,14 @@ AbstractComposite * Composite::getChild(unsigned int index){
 	}
 }
 
+void Composite::removeLastChild(){
+	children.pop_back();
+}
+
+void Composite::setChild(AbstractComposite * child, unsigned int index){
+	children[index] = child;
+}
+
 /** Function to insert a child to this Object
 * @param AbstractComposite * child
 */

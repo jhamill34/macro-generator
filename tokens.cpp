@@ -20,6 +20,21 @@ void add_token(queue<Token *> * token_queue, string value, TokenType type, int c
   tmp->type = type;
   tmp->col_num = col;
   tmp->row_num = row;
+  if(type == SYMBOL){
+    if(tmp->value[0] == PLUS || tmp->value[0] == MINUS){
+      tmp->priority = ADD_SUB;
+    }else if(tmp->value[0] == ASTERISK || tmp->value[0] == FSLASH){
+      tmp->priority = MULT_DIV;
+    }else if(tmp->value[0] == CARET){
+      tmp->priority = EXP;
+    }else{
+      tmp->priority = DEFAULT_PRIORTY;
+    }
+  }else{
+    tmp->priority = DEFAULT_PRIORTY;
+  }
+
+
   token_queue->push(tmp);
 }
 
@@ -46,13 +61,16 @@ scanner(char * filename){
       {
         if(i == line.size()){ 
           inMacro = false;
-        }else if(line.compare(i, strlen(FOR_LOOP), FOR_LOOP) == 0){
+        }else if(line.compare(i, strlen(FOR_LOOP), FOR_LOOP) == 0 
+              && !(IS_VALID_IDENTIFIER(line[i + strlen(FOR_LOOP)]))){
           add_token(token_queue, "FOR", FOR_LOOP_STATEMENT, i, lineNum);
           i += (strlen(FOR_LOOP) - 1);
-        }else if(line.compare(i, strlen(IF), IF) == 0){
+        }else if(line.compare(i, strlen(IF), IF) == 0
+          && !(IS_VALID_IDENTIFIER(line[i + strlen(IF)]))){
           add_token(token_queue, "IF", IF_CONDITION, i, lineNum);
           i += (strlen(IF) -1);
-        }else if(line.compare(i, strlen(ELSE), ELSE) == 0){
+        }else if(line.compare(i, strlen(ELSE), ELSE) == 0
+          && !(IS_VALID_IDENTIFIER(line[i + strlen(ELSE)]))){
           add_token(token_queue, "ELSE", ELSE_CONDITION, i, lineNum);
           i += (strlen(ELSE) - 1);
         }else if(line[i] == LP){
@@ -146,7 +164,7 @@ scanner(char * filename){
           }
           end = i;
           if(end != start){  
-            add_token(token_queue, line.substr(start, end - start), PRINT, i, lineNum);
+            add_token(token_queue, line.substr(start, end - start) + "\n", PRINT, i, lineNum);
           }
         }else{
           add_token(token_queue, "\n", PRINT, i, lineNum);
