@@ -2,13 +2,13 @@
 //MACRO: j = (1 + 2) * ( 3 + 4 ^ 2);
 //MACRO: j += 10;
 //MACRO: for(i = 0; i < 10; i += 1 ){ 
-+ at88:contact:{{ i }} HMARG CTR nog noc nor 1 {{ rst }} 
+some stuff {{ i }}. 
 //MACRO: } 
 
 {{ j }} 
 some other stuff
 
-//MACRO: a = 1
+//MACRO: a = 1;
 //MACRO: if(a == 1){
 if stuff....
 //MACRO: }else if(a == 2){
