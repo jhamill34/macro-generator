@@ -72,7 +72,7 @@ int Execute::execCondition(Token * t, CompositeIterator * iter){
 			return val1 < val2;
 		}else if(t->value.size() == 2 && t->value[0] == EQ && t->value[1] == EQ){
 			return val1 == val2;
-		}else if(t->value.size() == 1 && t->value[0] == BANG && t->value[1] == EQ){
+		}else if(t->value.size() == 2 && t->value[0] == BANG && t->value[1] == EQ){
 			return val1 != val2;
 		}else if(t->value.size() == 2 && t->value[0] == AND && t->value[1] == AND){
 			return val1 && val2;
@@ -149,12 +149,25 @@ void Execute::execForLoop(AbstractComposite * forstart, CompositeIterator * iter
 	}
 }
 
-void Execute::execIfCondition(CompositeIterator * iter){
-	// TODO: Finish
-}
+void Execute::execIfCondition(AbstractComposite * ifstart){
+	AbstractComposite * condition = ifstart->getChild(0);
+	CompositeIterator * condition_iter = condition->iterator();
 
-void Execute::execElseCondition(CompositeIterator * iter){	
-	// TODO: Finish
+	AbstractComposite * if_block = ifstart->getChild(1);
+	AbstractComposite * else_block;
+	if(ifstart->size() > 2){
+		else_block = ifstart->getChild(2);
+	}else{
+		else_block = NULL;
+	}
+
+	if(execCondition(condition->getData(), condition_iter)){
+		execBlock(if_block);
+	}else{
+		if(else_block != NULL){
+			execBlock(else_block);
+		}
+	}
 }
 
 
@@ -168,7 +181,7 @@ void Execute::execBlock(AbstractComposite * root){
 		if(current->type == FOR_LOOP_STATEMENT){
 			execForLoop(val, iter);
 		}else if(current->type == IF_CONDITION){
-			execIfCondition(iter);
+			execIfCondition(val);
 		}else if(current->type == SYMBOL && current->value[0] == EQ && current->value.size() == 1){
 			// TODO: implement scopes
 			Token * key = iter->next()->getData();

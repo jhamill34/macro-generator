@@ -19,8 +19,7 @@ public:
 
 private:
 	void execForLoop(AbstractComposite *, CompositeIterator*m);
-	void execIfCondition(CompositeIterator *);
-	void execElseCondition(CompositeIterator *);
+	void execIfCondition(AbstractComposite *);
 	void execBlock(AbstractComposite  *);
 	void execPrint(Token * current);
 	int toInteger(string value);

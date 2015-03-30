@@ -317,6 +317,7 @@ Composite * Parse::parseBlock(){
 
   if(next->type == EOP){
     cout << "Reached end of file before saw a closing bracket" << endl;
+    exit(1);
   }else{
     nesting_stack.pop();
     token_queue->pop();
