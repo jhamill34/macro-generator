@@ -34,4 +34,8 @@ String Literals "" ''
 What we don't need:
 built in data structures such as arrays or dictionarys (posibly rev 2)
 
-Variable scopes?? right now its only global
+4. Variable scopes?? right now its only global
+2. Including files higher priority. Two pass, insert files were they are requested (first pass macro) then parse new created file
+1. fix nesting blocks bug
+3. order of operations for logical statements
+5+.Funtions?? definitely a rev 2 action
