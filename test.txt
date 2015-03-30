@@ -1,17 +1,17 @@
-//MACRO: fora = 10;
+//MACRO: rst = "test";
 //MACRO: j = (1 + 2) * ( 3 + 4 ^ 2);
 //MACRO: j += 10;
 //MACRO: for(i = 0; i < 10; i += 1 ){ 
-some text here {{ i }} ... that was an inline
++ at88:contact:{{ i }} HMARG CTR nog noc nor 1 {{ rst }} 
 //MACRO: } 
 
 {{ j }} 
-{{ fora }} 
 some other stuff
 
-//MACRO: if(a == b){
+//MACRO: a = 1
+//MACRO: if(a == 1){
 if stuff....
-//MACRO: }else if(a == c){
+//MACRO: }else if(a == 2){
 else if stuff...
 //MACRO: }else{
 else stuff .. 	

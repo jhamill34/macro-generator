@@ -11,20 +11,21 @@ using namespace std;
 class Execute{
 	map<string, Token * > global_vars;
 	AbstractComposite * root;
-	CompositeIterator * program_iterator;
+	//CompositeIterator * program_iterator;
 
 public:
 	Execute(AbstractComposite *);
 	void executeProgram();
 
 private:
-	void execForLoop();
-	void execIfCondition();
-	void execElseCondition();
-	void execBlock();
+	void execForLoop(AbstractComposite *, CompositeIterator*m);
+	void execIfCondition(CompositeIterator *);
+	void execElseCondition(CompositeIterator *);
+	void execBlock(AbstractComposite  *);
 	void execPrint(Token * current);
 	int toInteger(string value);
-	int doMath(Token * t);
+	int doMath(Token * t, CompositeIterator *);
+	int execCondition(Token * current, CompositeIterator * iter);
 };
 
 #endif

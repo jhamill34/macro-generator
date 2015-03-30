@@ -44,6 +44,7 @@ public:
   AbstractComposite * first();
 
   AbstractComposite * next();
+  void reset();
 
   int getDepth();
 };

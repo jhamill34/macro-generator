@@ -37,6 +37,20 @@ AbstractComposite * CompositeIterator::first(){
 	return root;
 }
 
+/**
+ * Rewinds the iterator to the beginning of
+ * the data structure so we can re-iteratorate
+ * through the structure
+ */
+void CompositeIterator::reset(){
+	while(!child_stack->empty() && !index_stack->empty()){
+		child_stack->pop();
+		index_stack->pop();
+	}
+	child_stack->push(root);
+	index_stack->push(0);
+}
+
 /** Function to return the next node in the list
 * @return AbstractComposite * next
 */
