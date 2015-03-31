@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "tokens.h"
 #include "execute.h"
 
@@ -12,7 +13,7 @@ void Execute::executeProgram(){
 	execBlock(root);
 }
 
-int Execute::doMath(Token * t, CompositeIterator * iter){
+int Execute::execCondition(Token * t, CompositeIterator * iter){
 	if(t->type == IDENTIFIER){
 		if(global_vars[t->value] != NULL){
 			return toInteger(global_vars[t->value]->value);
@@ -23,8 +24,8 @@ int Execute::doMath(Token * t, CompositeIterator * iter){
 	}else if(t->type == NUMBER || t->type == STRING){
 		return toInteger(t->value);
 	}else{
-		int val1 = doMath(iter->next()->getData(), iter);
-		int val2 = doMath(iter->next()->getData(), iter);
+		int val1 = execCondition(iter->next()->getData(), iter);
+		int val2 = execCondition(iter->next()->getData(), iter);
 
 		if(t->value[0] == ASTERISK){
 			return val1 * val2;
@@ -41,28 +42,7 @@ int Execute::doMath(Token * t, CompositeIterator * iter){
 				res *= val1;
 			}
 			return res;
-		}
-	}
-	return 0;
-}
-
-int Execute::execCondition(Token * t, CompositeIterator * iter){
-	//AbstractComposite * current = iter->next();
-	if(t->type == IDENTIFIER){
-		if(global_vars[t->value] != NULL){
-			return toInteger(global_vars[t->value]->value);
-		}else{
-			cout << "undefind variable" << endl;
-			exit(1);
-		}
-	}else if(t->type == NUMBER || t->type == STRING){
-		return toInteger(t->value);
-	}else{
-		int val1 = execCondition(iter->next()->getData(), iter);
-		int val2 = execCondition(iter->next()->getData(), iter);
-
-
-		if(t->value.size() == 2 && t->value[0] == GT && t->value[1] == EQ){
+		}else if(t->value.size() == 2 && t->value[0] == GT && t->value[1] == EQ){
 			return val1 >= val2;
 		}else if(t->value.size() == 2 && t->value[0] == LT && t->value[1] == EQ){
 			return val1 <= val2;
@@ -82,6 +62,7 @@ int Execute::execCondition(Token * t, CompositeIterator * iter){
 			return 0;
 		}
 	}
+	return 0;
 }
 
 void Execute::execForLoop(AbstractComposite * forstart, CompositeIterator * iter){
@@ -108,7 +89,7 @@ void Execute::execForLoop(AbstractComposite * forstart, CompositeIterator * iter
 		result->row_num = -1;
 		result->priority = DEFAULT_PRIORTY;
 		if(val_t->type == SYMBOL){
-			result->value = to_string(doMath(val_t, iter));
+			result->value = to_string(execCondition(val_t, iter));
 		}else{
 			result = val_t;
 		}
@@ -134,7 +115,7 @@ void Execute::execForLoop(AbstractComposite * forstart, CompositeIterator * iter
 			result->row_num = -1;
 			result->priority = DEFAULT_PRIORTY;
 			if(val_t->type == SYMBOL){
-				result->value = to_string(doMath(val_t, repeat_iter));
+				result->value = to_string(execCondition(val_t, repeat_iter));
 			}else{
 				result = val_t;
 			}
@@ -165,7 +146,11 @@ void Execute::execIfCondition(AbstractComposite * ifstart){
 		execBlock(if_block);
 	}else{
 		if(else_block != NULL){
-			execBlock(else_block);
+                        if(else_block->getData()->type == IF_CONDITION){
+                                execIfCondition(else_block);
+                        }else{
+                                execBlock(else_block);
+                        }
 		}
 	}
 }
@@ -193,7 +178,7 @@ void Execute::execBlock(AbstractComposite * root){
 			result->row_num = -1;
 			result->priority = DEFAULT_PRIORTY;
 			if(val_t->type == SYMBOL){
-				result->value = to_string(doMath(val_t, iter));
+				result->value = to_string(execCondition(val_t, iter));
 			}else{
 				result = val_t;
 			}
@@ -228,3 +213,28 @@ int Execute::toInteger(string value){
 	}
 	return result;
 }
+
+string Execute::to_string(int value){
+        int val_tmp = value;
+        unsigned int size = 0;
+        while(val_tmp > 0){     
+                val_tmp = val_tmp / 10;
+                size++;
+        }
+
+        char * ch = new char[size + 1];
+
+        unsigned int i = size - 1;
+        ch[size] = '\0';
+        char strip;
+        while(value > 0){
+                strip = (value % 10) + '0';
+                value = value / 10;
+                ch[i] = strip;
+                i--;
+        }
+
+        string result(ch);
+        return result;
+}
+

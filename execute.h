@@ -22,9 +22,12 @@ private:
 	void execIfCondition(AbstractComposite *);
 	void execBlock(AbstractComposite  *);
 	void execPrint(Token * current);
-	int toInteger(string value);
-	int doMath(Token * t, CompositeIterator *);
+	//int doMath(Token * t, CompositeIterator *);
 	int execCondition(Token * current, CompositeIterator * iter);
+public:
+        static string to_string(int);       
+	static int toInteger(string value);
 };
 
 #endif
+

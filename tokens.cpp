@@ -27,6 +27,10 @@ void add_token(queue<Token *> * token_queue, string value, TokenType type, int c
       tmp->priority = MULT_DIV;
     }else if(tmp->value[0] == CARET){
       tmp->priority = EXP;
+    }else if(tmp->value[0] == LT || tmp->value[0] == GT || tmp->value[0] == EQ || tmp->value[0] == BANG){
+      tmp->priority = INEQUALITY;
+    }else if(tmp->value.size() == 2 && ((tmp->value[0] == AND && tmp->value[1] == AND) || (tmp->value[0] == PIPE && tmp->value[1] == PIPE))){
+      tmp->priority = LOGIC;
     }else{
       tmp->priority = DEFAULT_PRIORTY;
     }
@@ -59,8 +63,11 @@ scanner(char * filename){
     {
       if(inMacro)
       {
-        if(i == line.size()){ 
+        //if(i == line.size()){ 
+        if(line.compare(i, strlen(CLOSE_MACRO), CLOSE_MACRO) == 0){  
+          i += (strlen(CLOSE_MACRO) - 1);
           inMacro = false;
+          break;
         }else if(line.compare(i, strlen(FOR_LOOP), FOR_LOOP) == 0 
               && !(IS_VALID_IDENTIFIER(line[i + strlen(FOR_LOOP)]))){
           add_token(token_queue, "FOR", FOR_LOOP_STATEMENT, i, lineNum);
@@ -111,12 +118,15 @@ scanner(char * filename){
           int start, end;
           start = i;
           if(IS_SYMBOL(line[i+1])){
+            if(line[i] == FSLASH && line[i + 1] == FSLASH){
+              break; // ignore the rest of the line its a comment
+            }
             i++;
           }
           end = i + 1;
          
           add_token(token_queue, line.substr(start, end - start), SYMBOL, i, lineNum); 
-        }else if(line[i] != WS && line[i] != TAB){
+        }else if(line[i] != WS && line[i] != TAB && line[i] != NEWLINE && line[i] != '\0'){
           int start, end;
           start = i; 
           while(IS_VALID_IDENTIFIER(line[i])){
@@ -126,6 +136,8 @@ scanner(char * filename){
           i--;
           add_token(token_queue, line.substr(start, end - start), IDENTIFIER, i, lineNum);
         }
+
+
       }else{
         if(line.compare(i, strlen(OPEN_MACRO), OPEN_MACRO) == 0){
           i += (strlen(OPEN_MACRO) - 1);
@@ -159,6 +171,12 @@ scanner(char * filename){
               add_token(token_queue, line.substr(i, strlen(INLINE_CLOSE)), INLINE_END, i, lineNum);
               i += (strlen(INLINE_CLOSE)-1);
               start = i + 1;
+            }else if(i <= (line.size() - strlen(OPEN_MACRO)) && line.compare(i, strlen(OPEN_MACRO), OPEN_MACRO) == 0){
+              inMacro = true;
+              i += (strlen(OPEN_MACRO));
+              start = i;
+
+              break;
             }
             i++;
           }

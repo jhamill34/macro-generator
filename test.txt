@@ -1,23 +1,4 @@
-//MACRO: rst = "test";
-//MACRO: j = (1 + 2) * ( 3 + 4 ^ 2);
-//MACRO: j += 10;
-//MACRO: for(i = 0; i < 10; i += 1 ){ 
-//MACRO: if(i < 5){
-	Less than 5 -- {{ i }}. 
-//MACRO: }else{
-	Greater than 5 -- {{ i }}. 
-//MACRO: }
-//MACRO: } }
-
-{{ j }} 
-some other stuff
-  
-//MACRO: a = 3;
-//MACRO: if(a == 1){
-Bill {{ a }} 
-//MACRO: }else if(a == 2){
-BOB {{ a }} 
-//MACRO: }else{
-ROB {{ a }} 
-//MACRO: } }
-khkhkj
+<% a = 3; %>
+<% a = 1; %>
+<% b = 2; %>fdfsafas
+{{ a }} {{ b }} 

@@ -57,8 +57,8 @@
 #define Z_UPPER 'Z'
 
 // special
-#define OPEN_MACRO "//MACRO:"
-#define CLOSE_MACRO ":MACRO//"
+#define OPEN_MACRO "<\%"
+#define CLOSE_MACRO "\%>"
 #define INLINE_OPEN "{{"
 #define INLINE_CLOSE "}}"
 #define FOR_LOOP "for"
@@ -97,10 +97,12 @@ typedef enum {
 // DEFINED Priorities to used to order
 // Expressions in the correcto way PEMDAS
 #define DEFAULT_PRIORTY -1 // Note this is unsigned
-#define ADD_SUB 1
-#define MULT_DIV 2
-#define EXP 3
-#define PAREN_DELTA 3
+#define LOGIC 1
+#define INEQUALITY 2
+#define ADD_SUB 3
+#define MULT_DIV 4
+#define EXP 5
+#define PAREN_DELTA 5
 
 typedef struct Token{
   std::string value;

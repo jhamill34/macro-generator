@@ -61,7 +61,7 @@ AbstractComposite * Parse::parseStatement(){
       _statement = new Composite(next);
       token_queue->pop();
       _statement = parseConditionalBlock((Composite *)_statement);
-
+      return _statement;
     }else if(next->type == IDENTIFIER 
           || (next->type == SYMBOL && next->value.size() == 2 && ((next->value[0] == MINUS && next->value[1] == MINUS) 
                                      || (next->value[0] == PLUS && next->value[1] == PLUS)))){
@@ -236,6 +236,10 @@ AbstractComposite * Parse::parseExpressionHelp(unsigned int paren_depth){
           op->priority = MULT_DIV;
         }else if(op->value[0] == CARET){
           op->priority = EXP;
+        }else if(op->value[0] == LT || op->value[0] == GT || op->value[0] == EQ || op->value[0] == BANG){
+          op->priority = INEQUALITY;
+        }else if(op->value.size() == 2 && ((op->value[0] == AND && op->value[1] == AND) || (op->value[0] == PIPE && op->value[1] == PIPE))){
+          op->priority = LOGIC;
         }else{
           op->priority = DEFAULT_PRIORTY;
         }
@@ -310,17 +314,19 @@ Composite * Parse::parseBlock(){
     cout << next->value << endl;
     exit(1);
   }
+
+  next = token_queue->front();
   while(next->type != CLOSE_BLOCK && next->type != EOP){
     _block->addChild(parseStatement());
     next = token_queue->front();
   }
 
-  if(next->type == EOP){
+  if(next->type == CLOSE_BLOCK && nesting_stack.top() == OPEN_BLOCK){
+    nesting_stack.pop();
+    //token_queue->pop();
+  }else{
     cout << "Reached end of file before saw a closing bracket" << endl;
     exit(1);
-  }else{
-    nesting_stack.pop();
-    token_queue->pop();
   }
   return _block;
 }
@@ -395,11 +401,12 @@ Composite * Parse::parseConditionalBlock(Composite * _conditionblock){
     cout << next->value << endl;
     exit(1);
   }
-
+  //TODO: problem is here somewhere with nesting blocks....
   _conditionblock->addChild(parseExpression());
 
 
   _conditionblock->addChild(parseBlock());
+  token_queue->pop();
 
   next = token_queue->front();
   if(next->type == ELSE_CONDITION){
@@ -412,8 +419,10 @@ Composite * Parse::parseConditionalBlock(Composite * _conditionblock){
       _conditionblock->addChild(_nestedIf);
     }else{
       _conditionblock->addChild(parseBlock());
+      token_queue->pop();
     }
   }
 
   return _conditionblock;
 }
+
