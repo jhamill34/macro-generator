@@ -1,15 +1,15 @@
 <%  rst = "test"; 
 	j = (1 + 2) * ( 3 + 4 ^ 2); 
-	//j += 10; is a comment
+	//j += 10; // is a comment
 	// We are printing the condition below 10 times
 	for(i = 0; i < 10; i += 1 ){ // Actually anthin after double slash is a comment
 		// If this is true print "less than..."
 		if(i < 5){ %>
-	Less than 5 -- {{ i }}. 
+Less than 5 -- {{ i }}. 
 	<% 	// Else print greater than...
 		}else{ 
 	%>
-	Greater than 5 -- {{ i }}. 	
+Greater than 5 -- {{ i }}. 	
 	<% 	} // END IF/ELSE
 	} //END FOR LOOP %> <-- can't comment out tags either :/
 	%>
