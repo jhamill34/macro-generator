@@ -35,9 +35,10 @@ What we don't need:
 built in data structures such as arrays or dictionarys (posibly rev 2)
 
 4. Variable scopes?? right now its only global
-2. Including files higher priority. Two pass, insert files were they are requested (first pass macro) then parse new created file
+4b. Namespaces. Keeping the global scope for now
+2. Including files higher priority. Two pass, insert files were they are requested (first pass macro) then parse new created file DONE
 1. fix nesting blocks bug DONE
 3. order of operations for logical statements DONE
 ?. Comments done
 ?. Fixed macro blocks done
-5+.Funtions?? definitely a rev 2 action
+5+.Funtions and Data structures?? definitely a rev 2 action
