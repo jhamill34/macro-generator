@@ -64,7 +64,7 @@ AbstractComposite * Parse::parseStatement(){
       return _statement;
     }else if(next->type == IDENTIFIER 
           || (next->type == SYMBOL && next->value.size() == 2 && ((next->value[0] == MINUS && next->value[1] == MINUS) 
-                                     || (next->value[0] == PLUS && next->value[1] == PLUS)))){
+          || (next->value[0] == PLUS && next->value[1] == PLUS)))){
       _statement = parseAssignment();
       if(token_queue->front()->type != END_STATEMENT){
         cout << "Syntax Error: mising semi-colon" << endl;
@@ -97,15 +97,13 @@ Composite * Parse::parseInline(){
 
   next = token_queue->front();
   while(next->type != INLINE_END && next->type != EOP){
-    Leaf * _sub = new Leaf(next);
-    if(next->type == IDENTIFIER){
-      _inline->addChild(_sub);  
+    if(next->type == IDENTIFIER || IS_CONSTANT(next->type)){
+      _inline->addChild(parseExpression());
     }else{
       cout << "Syntax Error: expected variable inside inline tokens" << endl;
       cout << next->value << endl;
       exit(1);
     }
-    token_queue->pop();
     next = token_queue->front();
   }
 
@@ -150,12 +148,20 @@ Composite * Parse::parseAssignment(){
     Token * op = new Token();
     op->type = SYMBOL;
     op->value = sym->value[0];
-    if(op->value[0] == PLUS || op->value[0] == MINUS){
-      op->priority = ADD_SUB;
-    }else if(op->value[0] == ASTERISK || op->value[0] == FSLASH){
-      op->priority = MULT_DIV;
+    if(op->value[0] == PLUS ){
+      op->priority = ADD;
+    }else if(op->value[0] == MINUS){
+      op->priority = SUB;
+    }else if(op->value[0] == ASTERISK){
+      op->priority = MULT;
+    }else if(op->value[0] == FSLASH){
+      op->priority = DIV;
     }else if(op->value[0] == CARET){
       op->priority = EXP;
+    }else if(op->value[0] == LT || op->value[0] == GT || op->value[0] == EQ || op->value[0] == BANG){
+      op->priority = INEQUALITY;
+    }else if(op->value.size() == 2 && ((op->value[0] == AND && op->value[1] == AND) || (op->value[0] == PIPE && op->value[1] == PIPE))){
+      op->priority = LOGIC;
     }else{
       op->priority = DEFAULT_PRIORTY;
     }
@@ -206,7 +212,21 @@ AbstractComposite * Parse::parseExpressionHelp(unsigned int paren_depth){
     next = token_queue->front();
   }
 
-  if(next->type == IDENTIFIER || IS_CONSTANT(next->type)){
+  if(next->type == IDENTIFIER || IS_CONSTANT(next->type) || (next->type == SYMBOL && next->value[0] == MINUS)){
+    if(next->type == SYMBOL){
+        token_queue->pop();
+        next = token_queue->front();
+
+        if(next->type == IDENTIFIER){
+
+        }else if(IS_CONSTANT(next->type)){
+          next->value = "-" + next->value;
+        }else{
+          cout << "Improper value for expression found" << endl;
+          exit(1);
+        }
+    }
+
     Leaf * left_side = new Leaf(next);
     token_queue->pop();
     next = token_queue->front();
@@ -230,10 +250,15 @@ AbstractComposite * Parse::parseExpressionHelp(unsigned int paren_depth){
         Token * op = new Token();
         op->type = SYMBOL;
         op->value = next->value[0];
-        if(op->value[0] == PLUS || op->value[0] == MINUS){
-          op->priority = ADD_SUB;
-        }else if(op->value[0] == ASTERISK || op->value[0] == FSLASH){
-          op->priority = MULT_DIV;
+        
+        if(op->value[0] == PLUS ){
+          op->priority = ADD;
+        }else if(op->value[0] == MINUS){
+          op->priority = SUB;
+        }else if(op->value[0] == ASTERISK){
+          op->priority = MULT;
+        }else if(op->value[0] == FSLASH){
+          op->priority = DIV;
         }else if(op->value[0] == CARET){
           op->priority = EXP;
         }else if(op->value[0] == LT || op->value[0] == GT || op->value[0] == EQ || op->value[0] == BANG){
@@ -243,6 +268,7 @@ AbstractComposite * Parse::parseExpressionHelp(unsigned int paren_depth){
         }else{
           op->priority = DEFAULT_PRIORTY;
         }
+        
         op->priority += paren_depth;
 
         // Create a copy of the identifier token

@@ -21,10 +21,14 @@ void add_token(queue<Token *> * token_queue, string value, TokenType type, int c
   tmp->col_num = col;
   tmp->row_num = row;
   if(type == SYMBOL){
-    if(tmp->value[0] == PLUS || tmp->value[0] == MINUS){
-      tmp->priority = ADD_SUB;
-    }else if(tmp->value[0] == ASTERISK || tmp->value[0] == FSLASH){
-      tmp->priority = MULT_DIV;
+    if(tmp->value[0] == PLUS ){
+      tmp->priority = ADD;
+    }else if(tmp->value[0] == MINUS){
+      tmp->priority = SUB;
+    }else if(tmp->value[0] == ASTERISK){
+      tmp->priority = MULT;
+    }else if(tmp->value[0] == FSLASH){
+      tmp->priority = DIV;
     }else if(tmp->value[0] == CARET){
       tmp->priority = EXP;
     }else if(tmp->value[0] == LT || tmp->value[0] == GT || tmp->value[0] == EQ || tmp->value[0] == BANG){
@@ -49,12 +53,16 @@ void add_token(queue<Token *> * token_queue, string value, TokenType type, int c
 * @param queue<Token *> * queue of all the tokens found FIFO
 */
 queue<Token *> * 
-scanner(char * filename){
+scanner(char * filename, queue<Token *> * token_queue){
   string line;
   unsigned int i;
   unsigned int lineNum = 0;
   bool inMacro = false;
-  queue<Token *> * token_queue = new queue<Token *>;
+  bool mainProgram = false;
+  if(token_queue == NULL){      
+        token_queue = new queue<Token *>;
+        mainProgram = true;
+  }
 
   ifstream input(filename, ifstream::in);
   while(getline(input, line))
@@ -68,6 +76,24 @@ scanner(char * filename){
           i += (strlen(CLOSE_MACRO) - 1);
           inMacro = false;
           break;
+        }else if(line.compare(i, strlen(INCLUDE), INCLUDE) == 0){
+          int start, end;
+          i += (strlen(INCLUDE));
+          
+          if(line[i] == LP){
+            i++;
+            start = i;
+            while(line[i] != RP){
+              i++;
+            }
+            end = i;
+
+            scanner((char *)line.substr(start, end - start).c_str(), token_queue);
+          }else{
+            cout << "Expected open parenthesis after include statement" << endl;
+            exit(1);
+          }
+
         }else if(line.compare(i, strlen(FOR_LOOP), FOR_LOOP) == 0 
               && !(IS_VALID_IDENTIFIER(line[i + strlen(FOR_LOOP)]))){
           add_token(token_queue, "FOR", FOR_LOOP_STATEMENT, i, lineNum);
@@ -157,13 +183,34 @@ scanner(char * filename){
 
               while(line.compare(i, strlen(INLINE_CLOSE), INLINE_CLOSE)){
                 if(line[i] != WS && line[i] != TAB){
-                  int start, end;
-                  start = i;
-                  while(IS_VALID_IDENTIFIER(line[i])){
-                    i++;
+                  if(IS_SYMBOL(line[i])){
+                    int start, end;
+                    start = i;
+                    if(IS_SYMBOL(line[i+1])){
+                      i++;
+                    }
+                    end = i + 1;
+                    
+                    add_token(token_queue, line.substr(start, end - start), SYMBOL, i, lineNum); 
+                  }else if(line[i] <= NUMBER_NINE && line[i] >= NUMBER_ZERO){
+                    // Assumes numbers are not concatenated with letters or anything
+                    int start, end;
+                    start = i;
+                    while(line[i] <= NUMBER_NINE && line[i] >= NUMBER_ZERO){
+                      i++;
+                    }
+                    end = i;
+                    i--;
+                    add_token(token_queue, line.substr(start, end - start), NUMBER, i, lineNum);
+                  }else if(IS_VALID_IDENTIFIER(line[i])){
+                    int start, end;
+                    start = i;
+                    while(IS_VALID_IDENTIFIER(line[i])){
+                      i++;
+                    }
+                    end = i;
+                    add_token(token_queue, line.substr(start, end - start), IDENTIFIER, i, lineNum);
                   }
-                  end = i;
-                  add_token(token_queue, line.substr(start, end - start), IDENTIFIER, i, lineNum);
                 }
                 i++;
               }
@@ -191,7 +238,9 @@ scanner(char * filename){
     }
     lineNum++;
   }
-  add_token(token_queue, "Program End", EOP, -1, -1);
+  if(mainProgram){
+    add_token(token_queue, "Program End", EOP, -1, -1);
+  }
   return token_queue;
 }
 

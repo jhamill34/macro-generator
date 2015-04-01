@@ -64,6 +64,7 @@
 #define FOR_LOOP "for"
 #define IF "if"
 #define ELSE "else"
+#define INCLUDE "include"
 
 // Token Types
 typedef enum {
@@ -99,10 +100,13 @@ typedef enum {
 #define DEFAULT_PRIORTY -1 // Note this is unsigned
 #define LOGIC 1
 #define INEQUALITY 2
-#define ADD_SUB 3
-#define MULT_DIV 4
-#define EXP 5
-#define PAREN_DELTA 5
+#define ADD 3
+#define SUB 4
+#define MULT 6
+#define DIV 5
+#define EXP 7
+#define UNARY 8
+#define PAREN_DELTA 8
 
 typedef struct Token{
   std::string value;
@@ -113,6 +117,6 @@ typedef struct Token{
 } Token;
 
 void add_token(std::queue<Token *> *, std::string, TokenType);
-std::queue<Token *> * scanner(char *);
+std::queue<Token *> * scanner(char *, std::queue<Token *> * );
 
 #endif

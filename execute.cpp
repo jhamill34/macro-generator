@@ -18,8 +18,9 @@ int Execute::execCondition(Token * t, CompositeIterator * iter){
 		if(global_vars[t->value] != NULL){
 			return toInteger(global_vars[t->value]->value);
 		}else{
-			cout << "undefind variable" << endl;
-			exit(1);
+		//	cout << "undefind variable" << endl;
+		//	exit(1);
+                  return 0;
 		}
 	}else if(t->type == NUMBER || t->type == STRING){
 		return toInteger(t->value);
@@ -146,11 +147,11 @@ void Execute::execIfCondition(AbstractComposite * ifstart){
 		execBlock(if_block);
 	}else{
 		if(else_block != NULL){
-                        if(else_block->getData()->type == IF_CONDITION){
-                                execIfCondition(else_block);
-                        }else{
-                                execBlock(else_block);
-                        }
+            if(else_block->getData()->type == IF_CONDITION){
+                    execIfCondition(else_block);
+            }else{
+                    execBlock(else_block);
+            }
 		}
 	}
 }
@@ -188,12 +189,40 @@ void Execute::execBlock(AbstractComposite * root){
 		}else if(current->type == PRINT){
 			execPrint(current);
 		}else if(current->type == INLINE_START){
-			Token * id = iter->next()->getData();
-			if(global_vars[id->value] != NULL){
-				cout << global_vars[id->value]->value;
+			Token * id = iter->next()->getData();			 
+			//TODO: we need to create a clean iterator for
+			// this section so we can tell if the head is a symbol
+			// how to go about executing it etc..
+			
+			if(id->type == SYMBOL && id->value[0] == EQ && id->value.size() == 1){
+				// TODO: implement scopes
+				Token * key = iter->next()->getData();
+				Token * val_t = iter->next()->getData();
+				
+				Token * result = new Token;
+				result->type = val_t->type;
+				result->col_num = -1;
+				result->row_num = -1;
+				result->priority = DEFAULT_PRIORTY;
+				if(val_t->type == SYMBOL){
+					result->value = to_string(execCondition(val_t, iter));
+				}else{
+					result = val_t;
+				}
+				if(key->type == IDENTIFIER){
+					global_vars[key->value] = result;
+				} 
+
+				cout << result->value;
+			}else if(id->type != IDENTIFIER){
+				cout << to_string(execCondition(id, iter));
 			}else{
-				cout << endl << "Runtime Error: trying to access undefined var" << endl;
-				exit(1);
+				if(global_vars[id->value] != NULL){
+				  cout << global_vars[id->value]->value;
+				}else{
+				  cout << "No such variable found" << endl;
+				  exit(1);
+				}
 			}
 		}
 	}
@@ -205,27 +234,45 @@ void Execute::execPrint(Token * current){
 
 int Execute::toInteger(string value){
 	int i, multiplier;
-	int result = 0;
+        int end = 0;
+        int end_mult = 1;
+        int result = 0;
 	multiplier = 1;
-	for(i = (value.size() - 1); i >= 0; i--){
+	if(value[0] == MINUS){
+          end = 1;
+          end_mult = -1;
+        }
+        
+        for(i = (value.size() - 1); i >= end; i--){
 		result += (value[i] - '0') * multiplier;
 		multiplier *= 10;
 	}
-	return result;
+	return result * end_mult;
 }
 
 string Execute::to_string(int value){
         int val_tmp = value;
+        int neg_buf = 0;
         unsigned int size = 0;
+
+        if(val_tmp < 0){
+          val_tmp = val_tmp * -1;
+          neg_buf = 1;
+        }
         while(val_tmp > 0){     
                 val_tmp = val_tmp / 10;
                 size++;
         }
 
-        char * ch = new char[size + 1];
+        char * ch = new char[size + 1 + neg_buf];
 
-        unsigned int i = size - 1;
-        ch[size] = '\0';
+        if(neg_buf == 1){
+          ch[0] = '-';
+          value = value * -1;
+        }
+
+        unsigned int i = size - 1 + neg_buf;
+        ch[size + neg_buf] = '\0';
         char strip;
         while(value > 0){
                 strip = (value % 10) + '0';

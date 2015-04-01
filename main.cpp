@@ -14,7 +14,7 @@ int
 main(int argc, char * argv[])
 {  
   // Scan the file and create a lineup of Tokens
-  queue<Token *> * token_queue = scanner(argv[1]);
+  queue<Token *> * token_queue = scanner(argv[1], NULL);
 /*
   int i;
   for(i = 0; i < token_queue->size(); i++){

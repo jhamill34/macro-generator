@@ -23,7 +23,9 @@ clean:
 
 package: clean
 	mkdir macro
-	cp *.h *.c *.cpp Makefile test.txt macro
+	mkdir macro/examples
+	cp *.h *.c *.cpp Makefile macro 
+	cp examples/* macro/examples
 	tar -cjvf macro-archive.tar.bz ./macro
 	rm -rf macro 
 
