@@ -53,7 +53,11 @@ void add_token(queue<Token *> * token_queue, string value, TokenType type, int c
 * @param queue<Token *> * queue of all the tokens found FIFO
 */
 queue<Token *> * 
-scanner(char * filename, queue<Token *> * token_queue){
+scanner(char * filename, queue<Token *> * token_queue, string ns){
+  if(ns.compare(0, 1, "")){
+    ns = ns + ".";
+  }
+
   string line;
   unsigned int i;
   unsigned int lineNum = 0;
@@ -82,13 +86,32 @@ scanner(char * filename, queue<Token *> * token_queue){
           
           if(line[i] == LP){
             i++;
+
+            while(line[i] == WS || line[i] == TAB || line[i] == NEWLINE){
+              i++;
+            }
+
+            start = i;
+            while(line[i] != COMMA){
+              i++;
+            }
+
+            end = i;
+            char * fname = (char *)line.substr(start, end - start).c_str();
+            i++;
+            
+            while(line[i] == WS || line[i] == TAB || line[i] == NEWLINE){
+              i++;
+            }
+
             start = i;
             while(line[i] != RP){
               i++;
             }
             end = i;
+            string new_ns = line.substr(start, end - start);
 
-            scanner((char *)line.substr(start, end - start).c_str(), token_queue);
+            scanner(fname, token_queue, new_ns);
           }else{
             cout << "Expected open parenthesis after include statement" << endl;
             exit(1);
@@ -160,7 +183,7 @@ scanner(char * filename, queue<Token *> * token_queue){
           }
           end = i;
           i--;
-          add_token(token_queue, line.substr(start, end - start), IDENTIFIER, i, lineNum);
+          add_token(token_queue, ns + line.substr(start, end - start), IDENTIFIER, i, lineNum);
         }
 
 

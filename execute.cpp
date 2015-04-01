@@ -92,7 +92,11 @@ void Execute::execForLoop(AbstractComposite * forstart, CompositeIterator * iter
 		if(val_t->type == SYMBOL){
 			result->value = to_string(execCondition(val_t, iter));
 		}else{
-			result = val_t;
+			if(val_t->type == IDENTIFIER){
+				result = global_vars[val_t->value];
+			}else{
+				result = val_t;
+			}
 		}
 		if(key->type == IDENTIFIER){
 			global_vars[key->value] = result;
@@ -118,7 +122,11 @@ void Execute::execForLoop(AbstractComposite * forstart, CompositeIterator * iter
 			if(val_t->type == SYMBOL){
 				result->value = to_string(execCondition(val_t, repeat_iter));
 			}else{
-				result = val_t;
+				if(val_t->type == IDENTIFIER){
+					result = global_vars[val_t->value];
+				}else{
+					result = val_t;
+				}			
 			}
 			if(key->type == IDENTIFIER){
 				global_vars[key->value] = result;
@@ -179,9 +187,13 @@ void Execute::execBlock(AbstractComposite * root){
 			result->row_num = -1;
 			result->priority = DEFAULT_PRIORTY;
 			if(val_t->type == SYMBOL){
-				result->value = to_string(execCondition(val_t, iter));
-			}else{
-				result = val_t;
+					result->value = to_string(execCondition(val_t, iter));
+				}else{
+				if(val_t->type == IDENTIFIER){
+					result = global_vars[val_t->value];
+				}else{
+					result = val_t;
+				}			
 			}
 			if(key->type == IDENTIFIER){
 				global_vars[key->value] = result;
@@ -207,7 +219,11 @@ void Execute::execBlock(AbstractComposite * root){
 				if(val_t->type == SYMBOL){
 					result->value = to_string(execCondition(val_t, iter));
 				}else{
-					result = val_t;
+					if(val_t->type == IDENTIFIER){
+						result = global_vars[val_t->value];
+					}else{
+						result = val_t;
+					}
 				}
 				if(key->type == IDENTIFIER){
 					global_vars[key->value] = result;

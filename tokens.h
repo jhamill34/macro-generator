@@ -19,6 +19,7 @@
 #define RP ')'
 #define LB '{'
 #define RB '}'
+#define DOT '.'
 #define COLON ':'
 #define SEMICOLON ';'
 #define COMMA ','
@@ -44,7 +45,7 @@
 #define IS_VALID_IDENTIFIER(x) (x <= NUMBER_NINE && x >= NUMBER_ZERO) \
                             || (x >= A_LOWER && x <= Z_LOWER) \
                             || (x >= A_UPPER && x <= Z_UPPER) \
-                            || x == UNDERSCORE
+                            || x == UNDERSCORE || x == DOT
 
 // Use a range to determine 
 // val >= NUMBER_ONE || val <= NUMBER_NINE
@@ -117,6 +118,6 @@ typedef struct Token{
 } Token;
 
 void add_token(std::queue<Token *> *, std::string, TokenType);
-std::queue<Token *> * scanner(char *, std::queue<Token *> * );
+std::queue<Token *> * scanner(char *, std::queue<Token *> * , std::string ns);
 
 #endif

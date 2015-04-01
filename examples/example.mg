@@ -1,4 +1,4 @@
-<% include(examples/include.mg) 
+<% include(examples/include.mg, INC) 
        	// We are printing the condition below 10 times
 	for(i = 0; i < 10; i += 1 ){ // Actually anthin after double slash is a comment
 		// If this is true print "less than..."
@@ -12,7 +12,8 @@ Greater than 5 -- {{ i }}.
 	} //END FOR LOOP %> <-- can't comment out tags either :/
 	%>
 
-Contact:{{ j += 1 }} 
+
+Contact:{{ j += 1 }} // defaults at a starting value of 0... interesting
 
 Inline value:
 j = {{ j }} 
@@ -58,9 +59,9 @@ if(rst == "test"){
 }
 %>
 
-Contact:{{ j += 1 }}
-
-<% // a = 1;  set a in another file
+Contact:{{ j += 1 }} 
+{{ INC.a }} 
+<% a = INC.a; // a = 1;  set a in another file
 
 // If else construct 
 if(a == 1){ %>
